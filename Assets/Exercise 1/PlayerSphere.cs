@@ -1,38 +1,78 @@
+using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PlayerSphere : MonoBehaviour
 {
+    [SerializeField] private Text playTimeText;
+    [SerializeField] private Text bestTimeText;
+    
     [SerializeField] private AudioClip sfxJump;
     
     private Rigidbody _body;
     private AudioSource _sfxPlayer;
     
-    private float _velocity = 3f;
-    private float _moveForce = 20f;
+    private float _forwardVelocity = 3f;
+    private float _horizontalVelocity = 5f;
     private float _jumpForce = 130f;
 
     private bool _hasGroundContact = false;
+    private bool _reachedFinish = false;
 
+    private float _playTime = 0f;
+    private float _bestTime;
+
+    private const string BestTimeKey = "bestTime";
+    
     private void Awake()
     {
         _body = GetComponent<Rigidbody>();
         _sfxPlayer = GetComponent<AudioSource>();
     }
 
-    private void FixedUpdate()
+    private void Start()
     {
-        if (_hasGroundContact)
+        _bestTime = PlayerPrefs.GetFloat(BestTimeKey, -1f);
+
+        playTimeText.text = $"{_playTime:N2}";
+        bestTimeText.text = _bestTime > 0 ? $"{_bestTime:N2}" : "--";
+    }
+
+    private void Update()
+    {
+        if (!_reachedFinish)
         {
-            _body.velocity = new Vector3(0, 0, _velocity);
+            _playTime += Time.deltaTime;
+            playTimeText.text = $"{_playTime:N2}";
         }
 
+        if (Input.GetAxisRaw("Vertical") > 0)
+        {
+            _forwardVelocity = 6f;
+        }
+        else
+        {
+            _forwardVelocity = 3f;
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        var velocity = _body.velocity;
+        velocity.z = _forwardVelocity;
+        _body.velocity = velocity;
+
         ProcessPlayerMoves();
+        CheckFallingDown();
     }
 
     private void ProcessPlayerMoves()
     {
-        var moveForce = Input.GetAxis("Horizontal") * _moveForce;
-        _body.velocity = new Vector3(moveForce, _body.velocity.y, _body.velocity.z);
+        var move = Input.GetAxis("Horizontal") * _horizontalVelocity;
+        var velocity = _body.velocity;
+        velocity.x = move;
+        _body.velocity = velocity;
 
         if (Input.GetButtonDown("Jump") && _hasGroundContact)
         {
@@ -42,11 +82,32 @@ public class PlayerSphere : MonoBehaviour
         }
     }
 
+    private void CheckFallingDown()
+    {
+        if (transform.position.y < -4)
+        {
+            var activeScene = SceneManager.GetActiveScene();
+            SceneManager.LoadScene(activeScene.buildIndex);
+        }
+    }
+
     private void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.tag.Equals("Ground"))
+        _hasGroundContact = true;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag.Equals("Finish"))
         {
-            _hasGroundContact = true;
+            _reachedFinish = true;
+
+            if (_playTime < _bestTime || _bestTime < 0)
+            {
+                _bestTime = _playTime;
+                bestTimeText.text = $"{_bestTime:N2}";
+                PlayerPrefs.SetFloat(BestTimeKey, _bestTime);
+            }
         }
     }
 }
