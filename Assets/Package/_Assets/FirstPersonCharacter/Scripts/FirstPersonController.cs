@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Utility;
 using Random = UnityEngine.Random;
@@ -28,6 +29,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private AudioClip m_JumpSound = default;      // the sound played when character leaves the ground.
         [SerializeField] private AudioClip m_LandSound = default;        // the sound played when character touches back on ground.
 
+        [SerializeField] private Image fpsDot;
+
         private Camera m_Camera;
         private bool m_Jump;
         private float m_YRotation;
@@ -42,6 +45,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private bool m_Jumping;
         private AudioSource m_AudioSource;
 
+        private LayerMask _cubeMask;
+        private Rigidbody _cubeBody;
+
         // Use this for initialization
         private void Start()
         {
@@ -55,6 +61,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera.transform);
+            
+            _cubeMask = LayerMask.GetMask("CompanionCube");
+            _cubeBody = GameObject.FindWithTag("CompanionCube").GetComponent<Rigidbody>();
         }
 
 
@@ -130,8 +139,29 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             ProgressStepCycle(speed);
             UpdateCameraPosition(speed);
+            HandleCompanionCube();
 
             m_MouseLook.UpdateCursorLock();
+        }
+
+        private void HandleCompanionCube()
+        {
+            Vector3 playerPos = m_Camera.transform.position;
+            Vector3 lookDirection = m_Camera.transform.forward;
+
+            if (Physics.Raycast(playerPos, lookDirection, 5f, _cubeMask))
+            {
+                fpsDot.color = Color.red;
+
+                if (Input.GetButtonDown("Fire1"))
+                {
+                    _cubeBody.AddForce(m_Camera.transform.forward * 500f);
+                }
+            }
+            else
+            {
+                fpsDot.color = Color.white;
+            }
         }
 
 
