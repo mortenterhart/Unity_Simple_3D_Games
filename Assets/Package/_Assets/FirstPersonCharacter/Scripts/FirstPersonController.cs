@@ -30,6 +30,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private AudioClip m_LandSound = default;        // the sound played when character touches back on ground.
 
         [SerializeField] private Image fpsDot;
+        [SerializeField] private AudioClip sfxCubeHit;
 
         private Camera m_Camera;
         private bool m_Jump;
@@ -156,6 +157,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 if (Input.GetButtonDown("Fire1"))
                 {
                     _cubeBody.AddForce(m_Camera.transform.forward * 500f);
+                    m_AudioSource.PlayOneShot(sfxCubeHit);
                 }
             }
             else

@@ -64,7 +64,7 @@ public class PlayerSphere : MonoBehaviour
         _body.velocity = velocity;
 
         ProcessPlayerMoves();
-        CheckFallingDown();
+        CheckFallingOffPlatform();
     }
 
     private void ProcessPlayerMoves()
@@ -82,7 +82,7 @@ public class PlayerSphere : MonoBehaviour
         }
     }
 
-    private void CheckFallingDown()
+    private void CheckFallingOffPlatform()
     {
         if (transform.position.y < -4)
         {

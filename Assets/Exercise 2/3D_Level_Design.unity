@@ -2074,6 +2074,10 @@ PrefabInstance:
       propertyPath: fpsDot
       value: 
       objectReference: {fileID: 1495602478}
+    - target: {fileID: 11400000, guid: 4b2553e943e66c849b1a4937f310cd39, type: 3}
+      propertyPath: sfxCubeHit
+      value: 
+      objectReference: {fileID: 8300000, guid: a513f2153c42b714d90922f9222a878b, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4b2553e943e66c849b1a4937f310cd39, type: 3}
 --- !u!1 &404992396 stripped
